@@ -1,5 +1,5 @@
 #pragma once
-#include "SDL2/SDL.h"
+#include "SDL.h"
 inline SDL_FRect Offset(SDL_FRect p_rect, const double &p_x, const double &p_y) {
     p_rect.x = static_cast<float>(p_x+p_rect.x);
     p_rect.y = static_cast<float>(p_y+p_rect.y);

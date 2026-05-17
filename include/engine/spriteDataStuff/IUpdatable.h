@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 //TODO nush cum sa numesc acest header
 class IUpdatable {
