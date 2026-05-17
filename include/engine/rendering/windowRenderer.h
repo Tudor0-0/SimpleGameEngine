@@ -1,6 +1,7 @@
 #pragma once
 #include "SDL.h"
 #include "engine/utils/windowSettings.h"
+#include "engine/utils/windowsRescale.h"
 #include "engine/core/event.h"
 #include <bitset>
 #include <functional>

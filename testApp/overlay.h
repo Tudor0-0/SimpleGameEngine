@@ -86,7 +86,7 @@ public:
                 else
                     m_core->GetWindow()->SetResolutionAndScaling(1920,1080,1600,900),fullscreen=true;
             },
-            [this](){m_close.SetCurrentFrame(1);}
+            [this](){m_core.SetCurrentFrame(1);}
         );
         m_minimize.Init({ 1600-48*3, 0 , 48 , 32 },
            {minimizeNormal,minimizeHovered,minimizePressed},

@@ -2,8 +2,12 @@
 #include "engine/utils/exceptions.h"
 #include <iostream>
 #include <SDL_image.h>
+#include "engine/utils/windowsRescale.h"
 #include <cstring>
 Window::Window(const WindowSettings &p_config) {
+#ifdef _WIN32
+    SetProcessDpiAwareness();
+#endif
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         THROW_SDL_INIT_ERROR(std::string("Failed to initialize SDL: ") + SDL_GetError());
     }

@@ -202,6 +202,7 @@ FetchContent_MakeAvailable(googletest)
 
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
 add_executable(${MAIN_EXECUTABLE_NAME} ${SOURCES}
+        include/engine/utils/windowsRescale.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
@@ -221,7 +222,14 @@ add_custom_command(TARGET ${MAIN_EXECUTABLE_NAME} POST_BUILD
         "${CMAKE_CURRENT_SOURCE_DIR}/assets"
         "$<TARGET_FILE_DIR:${MAIN_EXECUTABLE_NAME}>/assets"
 )
-
+if(WIN32)
+    add_custom_command(TARGET ${MAIN_EXECUTABLE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:${MAIN_EXECUTABLE_NAME}>
+            $<TARGET_FILE_DIR:${MAIN_EXECUTABLE_NAME}>
+            COMMAND_EXPAND_LISTS
+    )
+endif()
 set_compiler_flags(RUN_SANITIZERS TRUE TARGET_NAMES ${MAIN_EXECUTABLE_NAME})
 # set_compiler_flags(TARGET_NAMES ${MAIN_EXECUTABLE_NAME} ${FOO} ${BAR})
 # where ${FOO} and ${BAR} represent additional executables or libraries
