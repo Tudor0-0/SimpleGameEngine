@@ -175,28 +175,6 @@ else()
     set(SDL2_MIXER_LIB SDL2_mixer)
 endif()
 
-# =========================================================================
-
-# --- Boost.Asio: System Search with Standalone Fallback ---
-find_package(Boost QUIET)
-
-if(Boost_FOUND)
-    message(STATUS "Using system Boost (Version: ${Boost_LIB_VERSION})")
-    set(ASIO_LIBS Boost::headers)
-else()
-    message(STATUS "Boost not found. Downloading standalone Asio...")
-    include(FetchContent)
-    FetchContent_Declare(
-            asio_standalone
-            GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-            GIT_TAG asio-1-30-2
-    )
-    FetchContent_MakeAvailable(asio_standalone)
-    set(ASIO_LIBS asio)
-    # Standalone Asio needs this macro to know it's not part of Boost
-    add_definitions(-DASIO_STANDALONE)
-endif()
-###############################################################################
 
 # external dependencies with FetchContent
 include(FetchContent)
@@ -233,11 +211,10 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(${MAIN_EXECUTABLE_NAME}
         PRIVATE
+        SDL2::SDL2main
         SDL2::SDL2              # Works whether system-found or downloaded
         ${SDL2_IMAGE_LIB}
         ${SDL2_MIXER_LIB}
-        ${ASIO_LIBS}            # Points to Boost::headers or standalone asio
-        Threads::Threads        # Required for Asio networking
 )
 add_custom_command(TARGET ${MAIN_EXECUTABLE_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

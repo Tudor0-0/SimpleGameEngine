@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL.h>
+#include "SDL.h"
 #include "engine/utils/windowSettings.h"
 #include "engine/core/event.h"
 #include <bitset>
