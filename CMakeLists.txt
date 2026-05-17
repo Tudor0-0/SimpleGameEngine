@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing executable name in this file
 # for now, the project name is used as the executable name
-set(MAIN_PROJECT_NAME "oop")
+set(MAIN_PROJECT_NAME "SimpleGameEngine")
 set(MAIN_EXECUTABLE_NAME "${MAIN_PROJECT_NAME}")
 
 
@@ -103,6 +103,99 @@ include(cmake/Options.cmake)
 include(cmake/CompilerFlags.cmake)
 include(cmake/CopyHelper.cmake)
 
+# --- SDL2: System Search with FetchContent Fallback ---
+find_package(SDL2 QUIET)
+
+if(SDL2_FOUND)
+    message(STATUS "Using system SDL2 (Version: ${SDL2_VERSION})")
+else()
+    message(STATUS "SDL2 not found on system. Downloading...")
+    include(FetchContent)
+    FetchContent_Declare(
+            SDL2
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-2.30.0  # Matches your local version
+    )
+    # We set this to avoid building SDL tests/examples which saves time
+    set(SDL_TEST OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(SDL2)
+endif()
+
+# =========================================================================
+# NEW: SDL2_image and SDL2_mixer configuration
+# =========================================================================
+
+# --- SDL2_image: System Search with FetchContent Fallback ---
+find_package(SDL2_image QUIET)
+
+if(SDL2_image_FOUND)
+    message(STATUS "Using system SDL2_image")
+    set(SDL2_IMAGE_LIB SDL2_image::SDL2_image)
+else()
+    message(STATUS "SDL2_image not found on system. Downloading...")
+    include(FetchContent)
+    FetchContent_Declare(
+            SDL2_image
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+            GIT_TAG release-2.8.2
+    )
+    set(SDL2IMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(SDL2IMAGE_TESTS OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(SDL2_image)
+    # The FetchContent target is usually named SDL2_image
+    set(SDL2_IMAGE_LIB SDL2_image)
+endif()
+
+# --- SDL2_mixer: System Search with FetchContent Fallback ---
+find_package(SDL2_mixer QUIET)
+
+if(SDL2_mixer_FOUND)
+    message(STATUS "Using system SDL2_mixer")
+    set(SDL2_MIXER_LIB SDL2_mixer::SDL2_mixer)
+else()
+    message(STATUS "SDL2_mixer not found on system. Downloading...")
+    include(FetchContent)
+    FetchContent_Declare(
+            SDL2_mixer
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+            GIT_TAG release-2.8.0
+    )
+    set(SDL2MIXER_SAMPLES OFF CACHE BOOL "" FORCE)
+
+    # Disable problematic external formats to ensure build succeeds
+    set(SDL2MIXER_OPUS OFF CACHE BOOL "" FORCE)
+    set(SDL2MIXER_FLAC OFF CACHE BOOL "" FORCE)
+    set(SDL2MIXER_MOD OFF CACHE BOOL "" FORCE)
+    set(SDL2MIXER_MIDI OFF CACHE BOOL "" FORCE)
+    set(SDL2MIXER_MIDI_FLUIDSYNTH OFF CACHE BOOL "" FORCE)
+    set(SDL2MIXER_WAVPACK OFF CACHE BOOL "" FORCE)          # ADDED: Disable WavPack
+
+    FetchContent_MakeAvailable(SDL2_mixer)
+    # The FetchContent target is usually named SDL2_mixer
+    set(SDL2_MIXER_LIB SDL2_mixer)
+endif()
+
+# =========================================================================
+
+# --- Boost.Asio: System Search with Standalone Fallback ---
+find_package(Boost QUIET)
+
+if(Boost_FOUND)
+    message(STATUS "Using system Boost (Version: ${Boost_LIB_VERSION})")
+    set(ASIO_LIBS Boost::headers)
+else()
+    message(STATUS "Boost not found. Downloading standalone Asio...")
+    include(FetchContent)
+    FetchContent_Declare(
+            asio_standalone
+            GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+            GIT_TAG asio-1-30-2
+    )
+    FetchContent_MakeAvailable(asio_standalone)
+    set(ASIO_LIBS asio)
+    # Standalone Asio needs this macro to know it's not part of Boost
+    add_definitions(-DASIO_STANDALONE)
+endif()
 ###############################################################################
 
 # external dependencies with FetchContent
@@ -114,10 +207,10 @@ include(FetchContent)
 # NOTE: Also update env vars used for caching in
 #         - .github/actions/configure-cmake/action.yml
 #         - .github/workflows/cmake.yml
- FetchContent_Declare(
-         googletest
-         URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
- )
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
 #
 FetchContent_MakeAvailable(googletest)
 
@@ -130,10 +223,28 @@ FetchContent_MakeAvailable(googletest)
 ###############################################################################
 
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
-add_executable(${MAIN_EXECUTABLE_NAME} main.cpp ${SOURCES})
+add_executable(${MAIN_EXECUTABLE_NAME} ${SOURCES}
+)
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
 # NOTE: RUN_SANITIZERS is optional, if it's not present it will default to true
+# --- Linking the Libraries ---
+find_package(Threads REQUIRED)
+
+target_link_libraries(${MAIN_EXECUTABLE_NAME}
+        PRIVATE
+        SDL2::SDL2              # Works whether system-found or downloaded
+        ${SDL2_IMAGE_LIB}
+        ${SDL2_MIXER_LIB}
+        ${ASIO_LIBS}            # Points to Boost::headers or standalone asio
+        Threads::Threads        # Required for Asio networking
+)
+add_custom_command(TARGET ${MAIN_EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:${MAIN_EXECUTABLE_NAME}>/assets"
+)
+
 set_compiler_flags(RUN_SANITIZERS TRUE TARGET_NAMES ${MAIN_EXECUTABLE_NAME})
 # set_compiler_flags(TARGET_NAMES ${MAIN_EXECUTABLE_NAME} ${FOO} ${BAR})
 # where ${FOO} and ${BAR} represent additional executables or libraries

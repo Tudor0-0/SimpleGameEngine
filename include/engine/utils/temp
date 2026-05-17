@@ -1,0 +1,33 @@
+    struct Camera {
+        double m_x=0, m_y=0;
+    }m_camera;
+        [[nodiscard]] double GetCameraX()const;
+        [[nodiscard]] double GetCameraY()const;
+        void SetCameraX(double p_x);
+        void SetCameraY(double p_y);
+        double Window::GetCameraX()const {
+            return m_camera.m_x;
+        }
+        double Window::GetCameraY()const {
+            return m_camera.m_y;
+        }
+        void Window::SetCameraX(const double p_x) {
+            m_camera.m_x = p_x;
+        }
+        void Window::SetCameraY(const double p_y) {
+            m_camera.m_y = p_y;
+        }
+        function scaleRectangle(rectX, rectY, rectW, rectH, pivotX, pivotY, scale) {
+            const newWidth = rectW * scale;
+            const newHeight = rectH * scale;
+
+            const newX = pivotX + (rectX - pivotX) * scale;
+            const newY = pivotY + (rectY - pivotY) * scale;
+
+            return {
+                x: newX,
+                y: newY,
+                width: newWidth,
+                height: newHeight
+            };
+        }
