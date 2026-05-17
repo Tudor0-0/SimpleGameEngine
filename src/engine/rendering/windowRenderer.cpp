@@ -87,16 +87,10 @@ void Window::RenderPresent() const {
     SDL_RenderPresent(m_renderer);
 }
 void Window::SetResolutionAndScaling(const int32_t p_windowWidth, const int32_t p_windowHeight, const int32_t p_internalWidth, const int32_t p_internalHeight) const {
-    for (int i=1;i<=5;i++) {
-        SDL_RenderPresent(m_renderer);
-        SDL_RenderClear(m_renderer);
-    }
     SDL_SetWindowSize(m_window, p_windowWidth, p_windowHeight);
     SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_RenderSetLogicalSize(m_renderer, p_internalWidth, p_internalHeight);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-
-
 }
 
 void Window::Render() const {
