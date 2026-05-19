@@ -1,101 +1,66 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# Simple Game Engine
 
-### Folosiți template-ul corespunzător grupei voastre!
+A lightweight, 2D game engine heavily inspired by [The Cherno's Hazel Engine](https://github.com/thecherno/hazel).
 
-| Laborant  | Link template                                |
-|-----------|----------------------------------------------|
-| Dragoș B  | https://github.com/Ionnier/oop-template      |
-| Tiberiu M | https://github.com/MaximTiberiu/oop-template |
-| Marius MC | https://github.com/mcmarius/oop-template     |
+This project is architected with modularity in mind, cleanly separating platform-specific windowing and rendering from the core game logic.
 
-## Instrucțiuni de compilare
+## Architecture
 
-Proiectul este configurat cu CMake.
+The engine is fundamentally split into two distinct parts:
+*   **The Window:** Handles all platform-level operations, including rendering and capturing raw user input.
+*   **The Core:** Manages the actual game logic, state, and interaction.
 
-Instrucțiuni pentru terminal:
+The Window does not directly access the Core. Instead, it communicates input updates via **event callbacks**.
 
-1. Pasul de configurare
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-# sau ./scripts/cmake.sh configure
-```
+## Usage
 
-Sau pe Windows cu GCC:
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
-# sau ./scripts/cmake.sh configure -g Ninja
-```
+To build a game or application with this engine, your primary workflow revolves around creating and managing custom layers.
 
-La acest pas putem cere să generăm fișiere de proiect pentru diverse medii de lucru.
+### 1. Creating Layers
+You implement your game logic by creating layers. Each layer requires you to set up your event dispatchers and define three core methods:
+*   `onUpdate(dt)`: Handles per-frame logic and state changes, updated using a delta time (`dt`).
+*   `onEvent(event)`: Receives and processes incoming input/window events.
+*   `onRender()`: Handles all drawing operations for that specific layer.
 
-## Cerințe obligatorii
+### 2. Layer Communication
+Every layer holds a pointer to the Core. This pointer serves as the primary bridge for layers to communicate with the engine and access shared resources.
 
-Nerespectarea duce la nepunctarea proiectului
+### 3. Pushing to the Stack
+Once your custom layer is created, you push it onto the engine's Layer Stack. The Core takes over from there, automatically calling your update, render, and event methods based on the stack hierarchy.
 
-  - programul va fi scris în C++
-  - programul va avea un meniu interactiv (doar pentru ilustrarea funcționalității)
-  - programul nu are erori de compilare
-  - fară variabile globale
-  - datele membre private(sau protected)
-  - GitHub Actions trecute
-  - commit-uri pe Git adecvate si punctuale
-  - folosirea a funcționalităților limbajului fără sens
-  - folosirea a funcționlităților limbajului cu scopul de a încălca "legal" o altă regulă
-      - folosirea excesivă a claselor friend
-      - folosirea excesviă a elementelor statice
-  - lipsa separarea implementarii de definitie
+### 4. The Main Loop
+The main game loop is housed entirely within the Core, abstracting the heavy lifting away from the user. The loop runs automatically; the only configuration you can (and need to) modify is the **target FPS**.
 
-## Cerințe
-- pentru fiecare cerință (sau subcerință) neîndeplinită se scade **1** punct
-- [ ] definirea a minim **2-3 ieararhii de clase** care sa interactioneze in cadrul temei alese (fie prin compunere, agregare sau doar sa apeleze metodele celeilalte intr-un mod logic)
-  - minim o clasa cu:
-    - [ ] constructori de inițializare [*](https://github.com/Ionnier/poo/tree/main/labs/L02#crearea-obiectelor)
-    - [ ] constructor supraîncărcat [*](https://github.com/Ionnier/poo/tree/main/labs/L02#supra%C3%AEnc%C4%83rcarea-func%C8%9Biilor)
-    - [ ] constructori de copiere [*](https://github.com/Ionnier/poo/tree/main/labs/L02#crearea-obiectelor)
-    - [ ] `operator=` de copiere [*](https://github.com/Ionnier/poo/tree/main/labs/L02#supra%C3%AEnc%C4%83rcarea-operatorilor)
-    - [ ] destructor [*](https://github.com/Ionnier/poo/tree/main/labs/L02#crearea-obiectelor)
-    - [ ] `operator<<` pentru afișare (std::ostream) [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L123)
-    - [ ] `operator>>` pentru citire (std::istream) [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L128)
-    - [ ] alt operator supraîncărcat ca funcție membră [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L32)
-    - [ ] alt operator supraîncărcat ca funcție non-membră [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L39) - nu neaparat ca friend
-  - in derivate
-      - [ ] implementarea funcționalităților alese prin [upcast](https://github.com/Ionnier/poo/tree/main/labs/L04#solu%C8%9Bie-func%C8%9Bii-virtuale-late-binding) și [downcast](https://github.com/Ionnier/poo/tree/main/labs/L04#smarter-downcast-dynamic-cast)
-        - aceasta va fi făcută prin **2-3** metode specifice temei alese
-        - funcțiile pentru citire / afișare sau destructorul nu sunt incluse deși o să trebuiască să le implementați 
-      - [ ] apelarea constructorului din clasa de bază din [constructori din derivate](https://github.com/Ionnier/poo/tree/main/labs/L04#comportamentul-constructorului-la-derivare)
-      - [ ] suprascris [cc](https://github.com/Ionnier/poo/tree/main/labs/L04#comportamentul-constructorului-de-copiere-la-derivare)/op= pentru copieri/atribuiri corecte
-      - [ ] destructor [virtual](https://github.com/Ionnier/poo/tree/main/labs/L04#solu%C8%9Bie-func%C8%9Bii-virtuale-late-binding)
-  - pentru celelalte clase se va definii doar ce e nevoie
-  - minim o ierarhie mai dezvoltata (cu 2-3 clase dintr-o clasa de baza)
-  - ierarhie de clasa se considera si daca exista doar o clasa de bază însă care nu moștenește dintr-o clasă din altă ierarhie
-- [ ] cât mai multe `const` [*](https://github.com/Ionnier/poo/tree/main/labs/L04#reminder-const-everywhere)
-- [ ] funcții și atribute `static` (în clase) [*](https://github.com/Ionnier/poo/tree/main/labs/L04#static)
-  - [ ] 1+ atribute statice non-triviale 
-  - [ ] 1+ funcții statice non-triviale
-- [ ] excepții [*](https://github.com/Ionnier/poo/tree/main/labs/L04#exception-handling)
-  - porniți de la `std::exception`
-  - ilustrați propagarea excepțiilor
-  - ilustrati upcasting-ul în blocurile catch
-  - minim folosit într-un loc în care tratarea erorilor în modurile clasice este mai dificilă
-- [ ] folosirea unei clase abstracte [*](https://github.com/Ionnier/poo/tree/main/labs/L04#clase-abstracte)
-- [ ] clase template
-  - [ ] crearea unei clase template [*](https://github.com/Ionnier/poo/tree/main/labs/L08)
-  - [ ] 2 instanțieri ale acestei clase
-- [ ] STL [*](https://github.com/Ionnier/poo/tree/main/labs/L07#stl)
-  - [ ] utilizarea a două structuri (containere) diferite (vector, list sau orice alt container care e mai mult sau mai putin un array)
-  - [ ] utilizarea a unui algoritm cu funcție lambda (de exemplu, sort, transform)
--  [ ] Design Patterns [*](https://github.com/Ionnier/poo/tree/main/labs/L08)
-  - [ ] utilizarea a două șabloane de proiectare
+## Layer Stack System
 
-### Observații
+The core logic operates on a **Layer Stack Architecture**.
+*   **Logic Updates:** Processed from **Top to Bottom** (topmost layers get priority for consuming events).
+*   **Rendering:** Processed from **Bottom to Top** (backgrounds draw first, UI draws last).
 
-* Pot exista depunctări până la 2p pentru diferite aspecte precum:
-  - memory leak-uri
-  - nefolosirea destructorului virtual la nevoie
-  - abuzarea de diferite concepte (toate funcțiile declarate virtual)
-  - apelarea de funcții virtual în constructori
+**Current Constraints & Features:**
+*   Only **one** instance of a specific layer class type is permitted on the stack at any given time.
+*   Layers can be manipulated using four primary methods: `push()`, `focus()`, `get()`, and `delete()`.
 
-* În general, acestea sunt prezente în [CppCoreGuideline](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md), dar nu e nevoie să parcurgeți documentul, doar să scrieți codul suficient de organizat
+## Event System
 
-* folderele `build/` și `install_dir/` sunt adăugate în fișierul `.gitignore` deoarece
-conțin fișiere generate și nu ne ajută să le versionăm.
+Raw inputs are captured by the Window, converted into standard events, and sent to the Core. These events are decoded at the Layer level using an `EventDispatcher`.
+
+Supported events include:
+*   **Keyboard:** Key Press, Key Release
+*   **Mouse:** Mouse Move, Mouse Button Press, Mouse Button Release
+*   **Window:** Window Resize
+
+## UI Components
+
+The engine features a built-in, highly flexible UI system designed to work **without the need for inheritance**. You can fully customize these objects—from their physical shape to their behavioral callbacks.
+
+### Clickables
+Interactive UI elements that respond to various mouse states. You can bind custom actions to the following states:
+*   `Hover`
+*   `Click`
+*   `Held`
+*   `Click Released`
+*   `Click Canceled`
+
+### Draggables
+An extension of the `Clickable` concept. They share all the same customizable properties and states but include built-in logic for click-and-drag functionality. Holding a click on a `Draggable` and moving the mouse will automatically translate the object's position across the screen.
