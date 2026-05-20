@@ -2,7 +2,7 @@
 #include "engine/core/core.h"
 #include "testApp/testLayer.h"
 #include "testApp/overlay.h"
-int main(int argc, char* argv[]) {
+int main([[maybe_unused]]int argc,[[maybe_unused]] char* argv[]) {
    WindowSettings windowSettings;
    windowSettings.height=900;
    windowSettings.width=1600;
