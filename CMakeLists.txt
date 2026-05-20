@@ -5,8 +5,20 @@ cmake_minimum_required(VERSION 3.26)
 set(MAIN_PROJECT_NAME "SimpleGameEngine")
 set(MAIN_EXECUTABLE_NAME "${MAIN_PROJECT_NAME}")
 
-
 project(${MAIN_PROJECT_NAME})
+
+# =========================================================================
+# NEW: RPATH Configuration for Linux / macOS
+# =========================================================================
+# Ensure the executable knows where to find shared libraries (.so / .dylib)
+# during CI runs, even if the executable is executed from a different folder.
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/lib;$ORIGIN/../lib;$ORIGIN/../_deps")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+# =========================================================================
+
 # set(CMAKE_PROJECT_VERSION_MAJOR 0)
 # set(CMAKE_PROJECT_VERSION_MINOR 0)
 # set(CMAKE_PROJECT_VERSION_PATCH 1)
