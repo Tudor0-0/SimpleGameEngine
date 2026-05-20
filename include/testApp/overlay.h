@@ -7,11 +7,12 @@
 #include "engine/core/core.h"
 #include "engine/basicUiObjects/clickable.h"
 #include "engine/basicUiObjects/draggable.h"
+#define FPS
 #define TEXTURE_BUTTON(buttonName,buttonPoz,buttonState)Texture buttonName={{48*buttonState,32*buttonPoz,48,32},TextureSheets::wControlButtons}
 class Overlay : public Layer {
 private:
     bool fullscreen=false;
-    bool minimized=false;
+    //bool minimized=false;
 
     TEXTURE_BUTTON(closeNormal,0,0);
     TEXTURE_BUTTON(closeHovered,0,1);
@@ -25,7 +26,7 @@ private:
 
     Clickable m_close,m_minimize,m_restore;
 
-    double camerax=0,cameray=0;
+    //double camerax=0,cameray=0;
 public:
     LAYER_CLASS_TYPE(overlayLayer);
     void OnEvent(const Event &p_event) override {
@@ -53,16 +54,26 @@ public:
            return false;
         });
     }
-    void OnUpdate(double p_deltaTime) override {
+    void OnUpdate(double ) override {
     }
-    void OnRender() override {
+    void OnRender() override{
+#ifdef FPS
+    #ifdef _WIN32
+         system("cls");
+
+    #elif defined(__APPLE__) || defined(__linux__)
+        printf("\033[2J\033[H");
+    #endif
+        std::cout<<m_core->GetCurrentFps()<<'\n';
+        std::cout<<std::flush;
+#endif
         m_core->GetWindow()->RenderRect();
         m_close.Render(m_core->GetWindow(),0,0);
         m_minimize.Render(m_core->GetWindow(),0,0);
         m_restore.Render(m_core->GetWindow(),0,0);
     }
 
-    ~Overlay(){
+    ~Overlay() override{
         std::cout<<"~overlayLayer()"<<'\n';
     }
     Overlay() {
@@ -86,7 +97,7 @@ public:
                 else
                     m_core->GetWindow()->SetResolutionAndScaling(1920,1080,1600,900),fullscreen=true;
             },
-            [this](){m_close.SetCurrentFrame(1);}
+            [this](){m_restore.SetCurrentFrame(1);}
         );
         m_minimize.Init({ 1600-48*3, 0 , 48 , 32 },
            {minimizeNormal,minimizeHovered,minimizePressed},
@@ -96,7 +107,6 @@ public:
            [this]() {
                 m_minimize.SetCurrentFrame(1);
                m_core->GetWindow()->Minimize();
-
               },
               [this](){ m_minimize.SetCurrentFrame(1);}
           );

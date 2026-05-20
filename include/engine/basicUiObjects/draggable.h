@@ -46,16 +46,18 @@ public:
             }
         }
     }
-    void OnMouseMoved(const float p_x, const float p_y, const double p_cameraX, const double p_cameraY) override
+    bool OnMouseMoved(const float p_x, const float p_y, const double p_cameraX, const double p_cameraY) override
     {
         m_lastWorldX = p_x + p_cameraX;
         m_lastWorldY = p_y + p_cameraY;
-        Clickable::OnMouseMoved(p_x, p_y, p_cameraX, p_cameraY);
+        bool used=Clickable::OnMouseMoved(p_x, p_y, p_cameraX, p_cameraY);
         if (m_dragging) {
             m_transform.x = m_lastWorldX - m_dragOffsetX;
             m_transform.y = m_lastWorldY - m_dragOffsetY;
             if (m_OnDrag) m_OnDrag();
+            used = true;
         }
+        return used;
     }
 
     bool OnMousePressed() override {

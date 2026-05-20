@@ -14,7 +14,7 @@ class Clickable:public Renderable,public IUpdatable {
     std::function<void()> m_OnClickRelease={};
     std::function<void()> m_OnClickCancel={};
     public:
-    virtual ~Clickable()=default;
+    ~Clickable() override=default;
     void Init(const Transform& p_transform,
              std::vector<Texture> p_frames,
              std::function<void()> p_onHover = {},
@@ -32,7 +32,7 @@ class Clickable:public Renderable,public IUpdatable {
         m_OnClickRelease = std::move(p_onClickRelease);
     }
 
-    virtual void OnMouseMoved(const float p_x, const float p_y, const double p_cameraX, const double p_cameraY) {
+    virtual bool OnMouseMoved(const float p_x, const float p_y, const double p_cameraX, const double p_cameraY) {
         const bool wasHovered = m_hovered;
         m_hovered = contains(p_x+p_cameraX, p_y+p_cameraY);
         if (m_hovered && !wasHovered) {
@@ -45,6 +45,7 @@ class Clickable:public Renderable,public IUpdatable {
             }
             if (m_OnHoverStop) m_OnHoverStop();
         }
+        return m_hovered;
     }
 
     virtual bool OnMousePressed() {
@@ -68,15 +69,15 @@ class Clickable:public Renderable,public IUpdatable {
     void Render(Window *window,const double &p_cameraX,const double &p_cameraY)override {
         window->RenderTexture(m_frames[m_currentFrame].m_spreadSheetID,
                                 m_frames[m_currentFrame].m_sourceRect,
-                                Scale(SDL_FRect(static_cast<float>(m_transform.x-p_cameraX),
+                                Scale(SDL_FRect{static_cast<float>(m_transform.x-p_cameraX),
                                                          static_cast<float>(m_transform.y-p_cameraY),
                                                          m_transform.width,
-                                                         m_transform.height),
+                                                         m_transform.height},
                                                          m_transform.scale),
                                 m_transform.angle,m_transform.p_center,m_transform.p_flip
                                 );
     };
-    void Update(double dt)override{
+    void Update(double )override{
 
     }
     void SetScale(const float &p_scale) {

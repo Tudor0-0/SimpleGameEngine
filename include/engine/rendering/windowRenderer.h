@@ -10,10 +10,10 @@
 ///     ||
 ///     v
 enum class TextureSheets :uint32_t{
-    testButtons,wControlButtons,maxTextureCount
+    testButtons,wControlButtons,star,maxTextureCount
 };
 inline constexpr const char* TEXTURE_PATHS[] = {
-    "assets/testbuttons.png","assets/wControl.png"
+    "assets/testbuttons.png","assets/wControl.png","assets/star.png"
 };
 ///
 ///

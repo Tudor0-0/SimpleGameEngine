@@ -5,6 +5,7 @@
 #include <ranges>
 
 Core::Core(const WindowSettings& p_windowSettings) {
+    SetFpsTarget(p_windowSettings.targetFps);
 try {
     m_window = new Window(p_windowSettings);
 }
@@ -38,10 +39,12 @@ void Core::Run() {
         m_window->Render();
         const double frameEndTime= m_window->GetTime();
         double deltaFrameTime= frameEndTime - frameStartTime;
-        m_currentFps = static_cast<uint32_t>(1/deltaFrameTime);
-      if (deltaFrameTime < m_frameTarget)
-            SDL_Delay(static_cast<uint32_t>(1000*(m_frameTarget-deltaFrameTime)));
-    }
+      if (deltaFrameTime < m_frameTarget) {
+          SDL_Delay(static_cast<uint32_t>(1000*(m_frameTarget-deltaFrameTime)));
+          m_currentFps = static_cast<uint32_t>(1/m_frameTarget);
+      }
+      else m_currentFps = static_cast<uint32_t>(1/deltaFrameTime); 
+      }
 }
 void Core::Stop() {
     m_running = false;

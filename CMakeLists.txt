@@ -203,6 +203,7 @@ FetchContent_MakeAvailable(googletest)
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
 add_executable(${MAIN_EXECUTABLE_NAME} ${SOURCES}
         include/engine/utils/windowsRescale.h
+        include/testApp/backgroundLayer.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
@@ -273,3 +274,21 @@ endif()
 copy_files(FILES tastatura.txt COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(FILES tastatura.txt config.json DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang")
+    # Flags supported by BOTH GCC and Clang
+    target_compile_options(${MAIN_EXECUTABLE_NAME} PRIVATE
+            -Wno-error=unused-variable
+            -Wno-error=unused-function
+            -Wno-error=unused-parameter
+    )
+
+    # Flags supported ONLY by Clang
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        target_compile_options(${MAIN_EXECUTABLE_NAME} PRIVATE
+                -Wno-error=unused-private-field
+        )
+    endif()
+
+elseif(MSVC)
+    target_compile_options(${MAIN_EXECUTABLE_NAME} PRIVATE /wd4100 /wd4101 /wd4505)
+endif()

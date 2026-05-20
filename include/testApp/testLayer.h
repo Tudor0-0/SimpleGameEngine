@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-
+#include <vector>
 #include "engine/core/layer.h"
 #include "engine/core/event.h"
 #include "engine/core/inputEvents.h"
@@ -12,12 +12,7 @@ class TestLayer: public Layer {
 private:
     uint8_t r=255,g=0,b=0,a=50,cnt=0,fullscreen=0;
     bool changing=false;
-    Texture normal={{0,0,48,32},TextureSheets::testButtons};
-    Texture hovered={{49,0,48,32},TextureSheets::testButtons};
-    Texture pressed={{97,0,48,32},TextureSheets::testButtons};
-    Texture clicked={{144,0,48,32},TextureSheets::testButtons};
-    Draggable button1;
-    Draggable button2;
+    std::vector<std::shared_ptr<Draggable>> butoane;
     double camerax=0,cameray=0;
 public:
     void OnEvent(const Event &p_event) override {
@@ -71,9 +66,11 @@ public:
         });
         dispatcher.Dispatch<MouseButtonPressedEvent>([this](const MouseButtonPressedEvent &event) -> bool {
             if (event.GetButtonCode() == SDL_BUTTON_LEFT) {
-                button1.OnMousePressed();
-                button2.OnMousePressed();
-                return true;
+                for (auto it=butoane.begin();it!=butoane.end();++it) if ((*it)->OnMousePressed()){
+                    std::rotate(butoane.begin(),it,it+1);
+                    return true;
+                }
+                return false;
             }
             if (event.GetButtonCode() == SDL_BUTTON_RIGHT) {
                 r=100,g=20,b=150,a=155;
@@ -83,22 +80,29 @@ public:
         });
         dispatcher.Dispatch<MouseButtonReleasedEvent>([this](const MouseButtonReleasedEvent &event) -> bool {
             if (event.GetButtonCode() == SDL_BUTTON_LEFT) {
-                button1.OnMouseReleased();
-                button2.OnMouseReleased();
-                return true;
+                for (auto it=butoane.begin();it!=butoane.end();++it) if ((*it)->OnMouseReleased()){
+                    std::rotate(butoane.begin(),it,it+1);
+                    return true;
+                }
+                return false;
             }
             return false;
         });
-        dispatcher.Dispatch<MouseMovedEvent>([this](const MouseMovedEvent &event) -> bool {
-            button1.OnMouseMoved(event.GetXPos(), event.GetYPos(),camerax,cameray);
-            button2.OnMouseMoved(event.GetXPos(), event.GetYPos(),camerax,cameray);
-           return false;
+        dispatcher.Dispatch<MouseMovedEvent>([this](const MouseMovedEvent &event) -> bool{
+            const float posX = event.GetXPos();
+            const float posY=event.GetYPos();
+            for (auto it=butoane.begin();it!=butoane.end();++it) if ((*it)->OnMouseMoved(posX,posY,camerax,cameray)){
+                     std::rotate(butoane.begin(),it,it+1);
+                     return true;
+                 }
+            return false;
         });
     }
     void OnUpdate(double p_deltaTime) override {
         cnt++;
-        button1.Update(p_deltaTime);
-        button2.Update(p_deltaTime);
+        for (auto it=butoane.begin();it!=butoane.end();++it) {
+            (*it)->Update(p_deltaTime);
+        }
         if (changing) {
             r=rand()%256;
             g=rand()%256;
@@ -107,9 +111,10 @@ public:
         }
     }
     void OnRender() override {
-        m_core->GetWindow()->RenderClear(r,g,b,a);
-        button1.Render(m_core->GetWindow(),camerax,cameray);
-        button2.Render(m_core->GetWindow(),camerax,cameray);
+        //m_core->GetWindow()->RenderClear(r,g,b,a);
+        for (auto it=butoane.rbegin();it!=butoane.rend();++it) {
+            (*it)->Render(m_core->GetWindow(),camerax,cameray);
+        }
         if (cnt==255) {
            //std::cout<<"here"<<'\n';;
         }
@@ -119,50 +124,47 @@ public:
         std::cout<<"~testLayer()"<<'\n';
     }
     TestLayer() {
-        button1.Init(
-     {200, 200, 48*5, 32*5},
-     {
-         {{0,   0, 48, 32}, TextureSheets::testButtons},
-         {{49,  0, 48, 32}, TextureSheets::testButtons},
-         {{97,  0, 48, 32}, TextureSheets::testButtons},
-         {{144, 0, 48, 32}, TextureSheets::testButtons},
-     },
-     [this]() { button1.SetCurrentFrame(1); },
-     [this]() { button1.SetCurrentFrame(0); },
-     [this]() {
-         button1.SetCurrentFrame(2);
-         r = rand() % 256;
-         g = rand() % 256;
-         b = rand() % 256;
-         a = rand() % 256;
-     },
-     [this]() { button1.SetCurrentFrame(2); },
-     [this]() { button1.SetCurrentFrame(1); },
-     [this]() {}
- );
-        button2.Init(
-    {200, 200-32*6, 48*5, 32*5},
-    {
-        {{0,   0, 48, 32}, TextureSheets::testButtons},
-        {{49,  0, 48, 32}, TextureSheets::testButtons},
-        {{97,  0, 48, 32}, TextureSheets::testButtons},
-        {{144, 0, 48, 32}, TextureSheets::testButtons},
-    },
-    [this]() { button2.SetCurrentFrame(1); button2.SetScale(1); }, // onHover,              // onHover
-    [this]() { button2.SetCurrentFrame(0); },              // onHoverStop
-    [this]() {                                             // onClick (quick click)
-        button2.SetCurrentFrame(2);
-        button2.SetScale(0.90);
-        r = rand() % 256;
-        g = rand() % 256;
-        b = rand() % 256;
-        a = rand() % 256;
-    },
-    [this]() { button2.SetCurrentFrame(2); button2.SetScale(0.90); }, // onDragStart
-    [this]() { button2.SetCurrentFrame(1); button2.SetScale(1); },    // onDragEnd
-    [this]() {}                                                        // onDrag
-);
+        int n = 3;
 
+        for (int i = 0; i < n; ++i) {
+            auto currentBtn = std::make_shared<Draggable>();
+            Draggable* rawBtn = currentBtn.get();
+
+            float posX = 200.0f;
+            float posY = 200.0f + (i * 32 * 6);
+
+            rawBtn->Init(
+                {posX, posY, 48*5, 32*5},
+                {
+                    {{0,   0, 48, 32}, TextureSheets::testButtons},
+                    {{49,  0, 48, 32}, TextureSheets::testButtons},
+                    {{97,  0, 48, 32}, TextureSheets::testButtons},
+                    {{144, 0, 48, 32}, TextureSheets::testButtons},
+                },
+                [this,rawBtn]() { rawBtn->SetCurrentFrame(1); rawBtn->SetScale(1); },
+                [this,rawBtn]() { rawBtn->SetCurrentFrame(0); },
+                [this, rawBtn]() {
+                    rawBtn->SetCurrentFrame(2);
+                    rawBtn->SetScale(0.90);
+                    int posrand=rand()%butoane.size();
+                    r = rand() % 256;
+                    g = rand() % 256;
+                    b = rand() % 256;
+                    a = rand() % 256;
+                    if (rand()%2)
+                    butoane.erase(butoane.begin()+posrand);
+                    else {
+
+
+                    }
+                },
+                [this,rawBtn]() { rawBtn->SetCurrentFrame(2); rawBtn->SetScale(0.90); },
+                [this,rawBtn]() { rawBtn->SetCurrentFrame(1); rawBtn->SetScale(1); },
+                []() {}
+            );
+
+            butoane.push_back(currentBtn);
+        }
     }
 };
 
