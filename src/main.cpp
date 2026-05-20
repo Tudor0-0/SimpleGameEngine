@@ -11,5 +11,5 @@ int main([[maybe_unused]]int argc,[[maybe_unused]] char* argv[]) {
    //core.RegisterLayer(std::unique_ptr<Layer> (new TestLayer()));
    core.RegisterLayer(std::unique_ptr<Layer> (new Overlay()));
    core.Run();
-   //incercarea a 5 a
+   return 0;
 }
