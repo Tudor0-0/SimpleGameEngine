@@ -17,7 +17,7 @@ protected:
     std::function<void()> m_OnDrag      = {};
 
 public:
-    virtual ~Draggable() = default;
+    ~Draggable() override = default;
 
     void Init(const Transform& p_transform,
               std::vector<Texture> p_frames,

@@ -274,21 +274,20 @@ endif()
 copy_files(FILES tastatura.txt COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(FILES tastatura.txt config.json DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang")
-    # Flags supported by BOTH GCC and Clang
-    target_compile_options(${MAIN_EXECUTABLE_NAME} PRIVATE
-            -Wno-error=unused-variable
-            -Wno-error=unused-function
-            -Wno-error=unused-parameter
-    )
-
-    # Flags supported ONLY by Clang
-    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-        target_compile_options(${MAIN_EXECUTABLE_NAME} PRIVATE
-                -Wno-error=unused-private-field
+if(DEFINED ENV{GITHUB_ACTIONS})
+    if(MSVC)
+        # MSVC flags:
+        # 4100: unreferenced formal parameter
+        # 4101: unreferenced local variable
+        # 4189: local variable initialized but not referenced
+        add_compile_options(/wd4100 /wd4101 /wd4189)
+    else()
+        # GCC / Clang flags
+        add_compile_options(
+                -Wno-unused-parameter
+                -Wno-unused-variable
+                -Wno-unused-function
+                -Wno-unused-but-set-variable
         )
     endif()
-
-elseif(MSVC)
-    target_compile_options(${MAIN_EXECUTABLE_NAME} PRIVATE /wd4100 /wd4101 /wd4505)
 endif()

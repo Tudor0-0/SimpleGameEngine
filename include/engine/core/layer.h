@@ -29,5 +29,5 @@ public:
     [[nodiscard]] bool IsActive() const;
     void SetActive(bool p_active);
     [[nodiscard]] inline const std::string& GetName() const { return m_debugName; }
-
+    
 };

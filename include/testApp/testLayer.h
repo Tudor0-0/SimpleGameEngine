@@ -111,7 +111,7 @@ public:
         }
     }
     void OnRender() override {
-        //m_core->GetWindow()->RenderClear(r,g,b,a);
+        m_core->GetWindow()->RenderClear(r,g,b,a);
         for (auto it=butoane.rbegin();it!=butoane.rend();++it) {
             (*it)->Render(m_core->GetWindow(),camerax,cameray);
         }
@@ -120,7 +120,7 @@ public:
         }
     }
     LAYER_CLASS_TYPE(testLayer);
-    ~TestLayer() {
+    ~TestLayer() override {
         std::cout<<"~testLayer()"<<'\n';
     }
     TestLayer() {
@@ -146,17 +146,15 @@ public:
                 [this, rawBtn]() {
                     rawBtn->SetCurrentFrame(2);
                     rawBtn->SetScale(0.90);
-                    int posrand=rand()%butoane.size();
+                    //int posrand=rand()%butoane.size();
                     r = rand() % 256;
                     g = rand() % 256;
                     b = rand() % 256;
                     a = rand() % 256;
-                    if (rand()%2)
-                    butoane.erase(butoane.begin()+posrand);
-                    else {
-
-
-                    }
+                  //  if (rand()%2)
+                   // butoane.erase(butoane.begin()+posrand);
+                  //  else {
+                  //  }
                 },
                 [this,rawBtn]() { rawBtn->SetCurrentFrame(2); rawBtn->SetScale(0.90); },
                 [this,rawBtn]() { rawBtn->SetCurrentFrame(1); rawBtn->SetScale(1); },

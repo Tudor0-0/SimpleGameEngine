@@ -1,4 +1,3 @@
-#pragma once
 #include "engine/rendering/windowRenderer.h"
 #include "engine/utils/exceptions.h"
 #include "engine/core/event.h"
