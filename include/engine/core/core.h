@@ -78,12 +78,15 @@ public:
         p_layer->SetCore(this);
         LayerCommand command;
         command.layer=std::move(p_layer);
+        command.layerType = LayerType::none;
         command.commandType=LayerCommandType::push;
         m_pendingCommands.push_back(std::move(command));
      }
     void RaiseEvent(const Event &p_event) const;
     void BindEventListener(Window &p_window) const;
     [[nodiscard]] uint32_t GetCurrentFps() const;
-
     void FlushLayerCommands();
+    Core& operator = (const Core p_core) = delete;
+    Core(const Core &p_core) = delete;
+    Core(Core &&p_core) = delete;
 };

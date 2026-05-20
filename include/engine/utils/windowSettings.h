@@ -14,7 +14,7 @@ struct WindowSettings {
     uint32_t    windowFlags = SDL_WINDOW_SHOWN|SDL_WINDOW_BORDERLESS;
     uint32_t    rendererFlags = SDL_RENDERER_ACCELERATED;
     WindowSettings() = default;
-    WindowSettings(const WindowSettings& p_windowSettings) {
+    WindowSettings(const WindowSettings& p_windowSettings){
         m_title = p_windowSettings.m_title;
         posx = p_windowSettings.posx;
         posy = p_windowSettings.posy;
@@ -24,14 +24,22 @@ struct WindowSettings {
         windowFlags = p_windowSettings.windowFlags;
         rendererFlags = p_windowSettings.rendererFlags;
     }
-    WindowSettings(WindowSettings&& p_windowSettings)  noexcept {
-        m_title = std::move(p_windowSettings.m_title);
-        posx = p_windowSettings.posx;
-        posy = p_windowSettings.posy;
-        width = p_windowSettings.width;
-        height = p_windowSettings.height;
-        windowFlags = p_windowSettings.windowFlags;
-        rendererFlags = p_windowSettings.rendererFlags;
+    WindowSettings(WindowSettings&& p_windowSettings)  noexcept:m_title(std::move(p_windowSettings.m_title) ),
+    posx (p_windowSettings.posx),
+    posy (p_windowSettings.posy),
+    width (p_windowSettings.width),
+    height (p_windowSettings.height),
+    targetFps (p_windowSettings.targetFps),
+    windowFlags (p_windowSettings.windowFlags),
+    rendererFlags (p_windowSettings.rendererFlags)
+    {
+       // m_title = std::move(p_windowSettings.m_title);
+       //  posx = p_windowSettings.posx;
+       //  posy = p_windowSettings.posy;
+       //  width = p_windowSettings.width;
+       //  height = p_windowSettings.height;
+       //  windowFlags = p_windowSettings.windowFlags;
+       //  rendererFlags = p_windowSettings.rendererFlags;
 
     }
 };
