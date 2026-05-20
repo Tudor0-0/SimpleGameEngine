@@ -86,7 +86,7 @@ public:
     void BindEventListener(Window &p_window) const;
     [[nodiscard]] uint32_t GetCurrentFps() const;
     void FlushLayerCommands();
-    Core& operator = (const Core p_core) = delete;
+    Core& operator = (const Core &p_core) = delete;
     Core(const Core &p_core) = delete;
     Core(Core &&p_core) = delete;
 };
