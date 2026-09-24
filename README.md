@@ -4,13 +4,11 @@
 [![CMake](https://img.shields.io/badge/CMake-3.26%2B-064F8C?logo=cmake)](https://cmake.org/)
 [![SDL2](https://img.shields.io/badge/Library-SDL2-red.svg)](https://www.libsdl.org/)
 
-A modular, lightweight 2D game engine written in modern **C++23** and **SDL2**, inspired by [The Cherno's Hazel Engine](https://github.com/TheCherno/Hazel). 
+A modular, lightweight 2D game engine written in modern C++23 and SDL2, inspired by [The Cherno's Hazel Engine](https://github.com/TheCherno/Hazel). 
 
-The engine cleanly separates windowing and platform operations from core game logic using a decoupled **Layer Stack**, a type-safe **compile-time Event Dispatcher**, and an extensible **component-based UI framework**.
+The engine cleanly separates windowing and platform operations from core game logic using a decoupled layer stack, a type-safe compile-time event dispatcher, and an extensible component-based UI framework.
 
----
-
-## Architecture Overview
+## Architecture overview
 
 ```mermaid
 flowchart TD
@@ -30,17 +28,15 @@ flowchart TD
     end
 ```
 
-### Key Architectural Highlights
-* **Deferred Command Queue (`FlushLayerCommands`):** Pushing, popping, or focusing layers during frame execution is deferred to safe sync points, completely preventing iterator invalidation.
-* **Dual-Direction Iteration:** 
-  - **Logic & Input:** Processed from **top to bottom** so UI and modals get first priority to handle and consume input events.
-  - **Rendering:** Processed from **bottom to top** using C++23 ranges (`std::views::reverse`) ensuring proper painter's algorithm depth ordering.
-* **Compile-Time Event Dispatching:** Type-safe event subscription leveraging `static_assert` and C++ type traits (`std::is_invocable_r_v`, `std::is_base_of_v`).
-* **Callback-Driven UI Composition:** Interactive UI components (`Clickable`, `Draggable`) utilize stateful lambdas and callback composition for behavioral logic, eliminating the need for users to write boilerplate subclasses for every widget.
+### Key architectural highlights
+* **Deferred command queue (`FlushLayerCommands`):** Pushing, popping, or focusing layers during frame execution is deferred to safe sync points, preventing iterator invalidation.
+* **Dual-direction iteration:** 
+  - **Logic & input:** Processed from top to bottom so UI and modals get first priority to handle and consume input events.
+  - **Rendering:** Processed from bottom to top using C++23 ranges (`std::views::reverse`) ensuring proper painter's algorithm depth ordering.
+* **Compile-time event dispatching:** Type-safe event subscription leveraging `static_assert` and C++ type traits (`std::is_invocable_r_v`, `std::is_base_of_v`).
+* **Callback-driven UI composition:** Interactive UI components (`Clickable`, `Draggable`) utilize stateful lambdas and callback composition for behavioral logic, eliminating the need for users to write boilerplate subclasses for every widget.
 
----
-
-## Quick Example
+## Quick example
 
 ```cpp
 #include "engine/core/core.h"
@@ -81,30 +77,26 @@ int main() {
 }
 ```
 
----
-
 ## Features
 
-### Event System
+### Event system
 Supported events include:
 * **Window:** `WindowCloseEvent`, `WindowMinimizedEvent`, `WindowRestoredEvent`
 * **Keyboard:** `KeyPressedEvent`, `KeyReleasedEvent`
 * **Mouse:** `MouseMovedEvent`, `MouseButtonPressedEvent`, `MouseButtonReleasedEvent`
 
-### UI Framework
-* **`Clickable`:** Reactive UI elements supporting `Hover`, `Click`, `Held`, `Click Released`, and `Click Canceled` states.
-* **`Draggable`:** Extends clickable components with smooth translation, hold timers, and drag threshold detection.
+### UI framework
+* `Clickable`: Reactive UI elements supporting hover, click, held, release, and cancel states.
+* `Draggable`: Extends clickable components with smooth translation, hold timers, and drag threshold detection.
 
----
-
-## Building from Source
+## Building from source
 
 ### Prerequisites
-* **CMake** $\ge$ 3.26
-* **C++23 compliant compiler** (GCC 13+, Clang 16+, or MSVC 2022+)
+* CMake $\ge$ 3.26
+* C++23 compliant compiler (GCC 13+, Clang 16+, or MSVC 2022+)
 * *Note:* All core third-party dependencies (`SDL2`, `SDL2_image`, `SDL2_mixer`) are automatically fetched and built via CMake `FetchContent`—no manual library installations required.
 
-### Build Steps
+### Build steps
 
 ```bash
 # 1. Clone the repository
