@@ -35,20 +35,24 @@ void Window::GetInput() {
     uint8_t *oldKeyState = m_keyState;
     for (uint32_t i = 0; i < SDL_NUM_SCANCODES; i++)
         if (newKeyState[i] != oldKeyState[i]) {
-            if (newKeyState[i])m_eventSender(KeyPressedEvent(i));
-            else m_eventSender(KeyReleasedEvent(i));
+            if (newKeyState[i])
+                m_eventSender(KeyPressedEvent(i));
+            else
+                m_eventSender(KeyReleasedEvent(i));
         }
     memcpy(oldKeyState, newKeyState, SDL_NUM_SCANCODES);
     int32_t mouseX, mouseY;
     const uint32_t newMouseState = SDL_GetMouseState(&mouseX, &mouseY);
-    float dmouseX , dmouseY;
-    SDL_RenderWindowToLogical(m_renderer, mouseX,mouseY, &dmouseX, &dmouseY);
+    float dmouseX, dmouseY;
+    SDL_RenderWindowToLogical(m_renderer, mouseX, mouseY, &dmouseX, &dmouseY);
     if (dmouseX != m_mouseX || dmouseY != m_mouseY)
         m_eventSender(MouseMovedEvent(dmouseX, dmouseY));
     for (uint32_t i = 1; i <= 5; i++)
         if ((newMouseState & SDL_BUTTON(i)) != (m_mouseState & SDL_BUTTON(i))) {
-            if (newMouseState & SDL_BUTTON(i))m_eventSender(MouseButtonPressedEvent(i));
-            else m_eventSender(MouseButtonReleasedEvent(i));
+            if (newMouseState & SDL_BUTTON(i))
+                m_eventSender(MouseButtonPressedEvent(i));
+            else
+                m_eventSender(MouseButtonReleasedEvent(i));
         }
     m_mouseX = dmouseX;
     m_mouseY = dmouseY;

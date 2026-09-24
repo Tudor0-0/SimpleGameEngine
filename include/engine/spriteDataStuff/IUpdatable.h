@@ -7,10 +7,10 @@ public:
     virtual ~IUpdatable() = default;
 };
 struct Transform {
-    double x=0, y=0;
-    float width=0, height=0;
+    double x = 0, y = 0;
+    float width = 0, height = 0;
     float angle = 0.0;
-    SDL_FPoint p_center = {0,0};
+    SDL_FPoint p_center = {0, 0};
     SDL_RendererFlip p_flip = SDL_FLIP_NONE;
     float scale = 1.0;
 };

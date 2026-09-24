@@ -12,28 +12,16 @@ private:
 public:
     LAYER_CLASS_TYPE(mainLayer);
 
-    BackgroundLayer() {
-        m_star.Init(
-            { 0, 0, 1600, 900 },
-            {
-                { {0, 0, 1600, 1491}, TextureSheets::star }
-            }
-        );
-    }
+    BackgroundLayer() { m_star.Init({0, 0, 1600, 900}, {{{0, 0, 1600, 1491}, TextureSheets::star}}); }
 
     ~BackgroundLayer() override = default;
 
-    void OnEvent(const Event &) override {
-    }
+    void OnEvent(const Event &) override {}
 
-    void OnUpdate(double p_deltaTime) override {
-        m_star.Update(p_deltaTime);
-    }
+    void OnUpdate(double p_deltaTime) override { m_star.Update(p_deltaTime); }
 
     void OnRender() override {
         m_core->GetWindow()->RenderClear(m_r, m_g, m_b, m_a);
         m_star.Render(m_core->GetWindow(), 0, 0);
     }
 };
-
-

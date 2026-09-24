@@ -12,14 +12,8 @@ Window::Window(const WindowSettings &p_config) {
         THROW_SDL_INIT_ERROR(std::string("Failed to initialize SDL: ") + SDL_GetError());
     }
 
-    m_window = SDL_CreateWindow(
-        p_config.m_title.c_str(),
-        p_config.posx,
-        p_config.posy,
-        p_config.width,
-        p_config.height,
-        p_config.windowFlags
-    );
+    m_window = SDL_CreateWindow(p_config.m_title.c_str(), p_config.posx, p_config.posy, p_config.width, p_config.height,
+                                p_config.windowFlags);
     if (!m_window) {
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
         SDL_Quit();
@@ -39,7 +33,7 @@ Window::Window(const WindowSettings &p_config) {
 }
 
 Window::~Window() {
-    for (SDL_Texture* texture : m_textures) {
+    for (SDL_Texture *texture : m_textures) {
         if (texture) {
             SDL_DestroyTexture(texture);
         }
@@ -57,46 +51,35 @@ Window::~Window() {
     SDL_Quit();
 }
 
-void Window::SetTitle(const std::string& p_title) const {
+void Window::SetTitle(const std::string &p_title) const {
     if (m_window) {
         SDL_SetWindowTitle(m_window, p_title.c_str());
     }
 }
 
-bool Window::RenderTexture(TextureSheets p_textureSheetId,
-                           const SDL_Rect &p_srcRect,
-                           const SDL_FRect &p_dstRect,
-                           const double &p_angle,
-                           const SDL_FPoint &p_center,
-                           const SDL_RendererFlip p_flip ) const
-{
-    if (const int32_t result = SDL_RenderCopyExF(m_renderer,
-                                                m_textures[static_cast<uint32_t>(p_textureSheetId)],
-                                                &p_srcRect,
-                                                &p_dstRect,
-                                                p_angle,
-                                                &p_center,
-                                                p_flip); result != 0) {
+bool Window::RenderTexture(TextureSheets p_textureSheetId, const SDL_Rect &p_srcRect, const SDL_FRect &p_dstRect,
+                           const double &p_angle, const SDL_FPoint &p_center, const SDL_RendererFlip p_flip) const {
+    if (const int32_t result = SDL_RenderCopyExF(m_renderer, m_textures[static_cast<uint32_t>(p_textureSheetId)],
+                                                 &p_srcRect, &p_dstRect, p_angle, &p_center, p_flip);
+        result != 0) {
         std::cerr << "Texture rendering failed: " << SDL_GetError() << '\n';
         return false;
-                                                }
+    }
 
     return true;
 }
-bool Window::LoadTexture(SDL_Texture*& p_dest, const char* p_path) const {
-    SDL_Surface* temps = IMG_Load(p_path);
-    if (temps == nullptr)
-    {
-        std::cerr<<"Failed to load surface from path"<<p_path<<" SDL_image Error: "<< IMG_GetError()<<'\n';
+bool Window::LoadTexture(SDL_Texture *&p_dest, const char *p_path) const {
+    SDL_Surface *temps = IMG_Load(p_path);
+    if (temps == nullptr) {
+        std::cerr << "Failed to load surface from path" << p_path << " SDL_image Error: " << IMG_GetError() << '\n';
         p_dest = nullptr;
         return false;
     }
     p_dest = SDL_CreateTextureFromSurface(m_renderer, temps);
     SDL_FreeSurface(temps);
 
-    if (p_dest == nullptr)
-    {
-        std::cerr<<"Failed to create texture from"<<p_path<<" SDL Error: "<< SDL_GetError()<<'\n';
+    if (p_dest == nullptr) {
+        std::cerr << "Failed to create texture from" << p_path << " SDL Error: " << SDL_GetError() << '\n';
         return false;
     }
 
@@ -109,7 +92,8 @@ void Window::RenderClear(const uint8_t r, const uint8_t g, const uint8_t b, cons
 void Window::RenderPresent() const {
     SDL_RenderPresent(m_renderer);
 }
-void Window::SetResolutionAndScaling(const int32_t p_windowWidth, const int32_t p_windowHeight, const int32_t p_internalWidth, const int32_t p_internalHeight) const {
+void Window::SetResolutionAndScaling(const int32_t p_windowWidth, const int32_t p_windowHeight,
+                                     const int32_t p_internalWidth, const int32_t p_internalHeight) const {
     SDL_DisplayMode dm;
     const int displayIndex = SDL_GetWindowDisplayIndex(m_window);
     bool isTargetFullscreen = false;
@@ -147,14 +131,13 @@ double Window::GetTime() {
 }
 void Window::BuildTextures() {
     for (uint32_t i = 0; i < static_cast<uint32_t>(TextureSheets::maxTextureCount); i++) {
-       LoadTexture(m_textures[i], TEXTURE_PATHS[i]);
+        LoadTexture(m_textures[i], TEXTURE_PATHS[i]);
     }
 }
 
 void Window::RenderRect(SDL_Rect p_rect, uint8_t r, uint8_t g, uint8_t b, uint8_t a) const {
-        SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
-        SDL_RenderFillRect(m_renderer, &p_rect);
-
+    SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
+    SDL_RenderFillRect(m_renderer, &p_rect);
 }
 void Window::Minimize() const {
     SDL_MinimizeWindow(m_window);

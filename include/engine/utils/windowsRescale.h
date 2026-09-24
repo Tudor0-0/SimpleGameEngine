@@ -6,9 +6,9 @@
 inline void SetProcessDpiAwareness() {
     HMODULE user32 = LoadLibraryA("user32.dll");
     if (user32) {
-        using SetProcessDpiAwarenessContextFunc = BOOL(WINAPI*)(HANDLE);
-        auto SetProcessDpiAwarenessContext =
-            reinterpret_cast<SetProcessDpiAwarenessContextFunc>(GetProcAddress(user32, "SetProcessDpiAwarenessContext"));
+        using SetProcessDpiAwarenessContextFunc = BOOL(WINAPI *)(HANDLE);
+        auto SetProcessDpiAwarenessContext = reinterpret_cast<SetProcessDpiAwarenessContextFunc>(
+            GetProcAddress(user32, "SetProcessDpiAwarenessContext"));
         if (SetProcessDpiAwarenessContext) {
             SetProcessDpiAwarenessContext(reinterpret_cast<HANDLE>(static_cast<INT_PTR>(-4)));
         }
