@@ -8,7 +8,7 @@ int main([[maybe_unused]]int argc,[[maybe_unused]] char* argv[]) {
    windowSettings.width=1600;
    windowSettings.targetFps = 144;
    Core core(windowSettings);
-   //core.RegisterLayer(std::unique_ptr<Layer> (new TestLayer()));
+   core.RegisterLayer(std::unique_ptr<Layer> (new TestLayer()));
    core.RegisterLayer(std::unique_ptr<Layer> (new Overlay()));
    core.Run();
    return 0;
