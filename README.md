@@ -36,7 +36,7 @@ flowchart TD
   - **Logic & Input:** Processed from **top to bottom** so UI and modals get first priority to handle and consume input events.
   - **Rendering:** Processed from **bottom to top** using C++23 ranges (`std::views::reverse`) ensuring proper painter's algorithm depth ordering.
 * **Compile-Time Event Dispatching:** Type-safe event subscription leveraging `static_assert` and C++ type traits (`std::is_invocable_r_v`, `std::is_base_of_v`).
-* **Zero-Subclassing UI:** Interactive UI components (`Clickable`, `Draggable`) utilize stateful callback composition instead of rigid inheritance hierarchies.
+* **Callback-Driven UI Composition:** Interactive UI components (`Clickable`, `Draggable`) utilize stateful lambdas and callback composition for behavioral logic, eliminating the need for users to write boilerplate subclasses for every widget.
 
 ---
 
