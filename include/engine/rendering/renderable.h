@@ -1,9 +1,9 @@
 #pragma once
 #include "engine/rendering/windowRenderer.h"
-#pragma once
+
 struct Texture {
     SDL_Rect m_sourceRect;
-    TextureSheets m_spreadSheetID;
+    TextureSheets m_spriteSheetId;
 };
 class Renderable {
 protected:

@@ -5,7 +5,9 @@ enum class EventType
 {
     none = 0,
     keyPressed, keyReleased,
-    mouseButtonPressed, mouseButtonReleased, mouseMoved, mouseScrolled,windowMinimized,windowRestored,windowWindowed,windowFullscreen
+    mouseButtonPressed, mouseButtonReleased, mouseMoved, mouseScrolled,
+    windowMinimized, windowRestored, windowWindowed, windowFullscreen,
+    windowClosed
 };
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
 virtual EventType GetEventType() const override { return GetStaticType(); }

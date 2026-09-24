@@ -56,9 +56,16 @@ void Core::RaiseEvent(const Event &p_event) const {
             if (p_event.IsHandled())break;
     }
 }
- void Core::BindEventListener(Window &p_window) const {
+void Core::BindEventListener(Window &p_window) {
     p_window.SetEventHandler([this](const Event &p_event) {
         RaiseEvent(p_event);
+        if (p_event.GetEventType() == EventType::windowClosed && !p_event.IsHandled()) {
+            Stop();
+        } else if (p_event.GetEventType() == EventType::windowMinimized) {
+            m_minimized = true;
+        } else if (p_event.GetEventType() == EventType::windowRestored) {
+            m_minimized = false;
+        }
     });
 }
 void Core::RegisterLayer(std::unique_ptr<Layer> p_layer) {
@@ -75,6 +82,10 @@ void Core::SetFpsTarget(const uint32_t p_targetFps) {
 
 uint32_t Core::GetCurrentFps() const {
     return m_currentFps;
+}
+
+bool Core::IsMinimized() const {
+    return m_minimized;
 }
 void Core::FlushLayerCommands() {
     for (auto&[commandType, layerType, layer] : m_pendingCommands) {

@@ -39,9 +39,28 @@ Window::Window(const WindowSettings &p_config) {
 }
 
 Window::~Window() {
-    SDL_DestroyRenderer(m_renderer);
-    SDL_DestroyWindow(m_window);
+    for (SDL_Texture* texture : m_textures) {
+        if (texture) {
+            SDL_DestroyTexture(texture);
+        }
+    }
+    m_textures.clear();
+
+    if (m_renderer) {
+        SDL_DestroyRenderer(m_renderer);
+        m_renderer = nullptr;
+    }
+    if (m_window) {
+        SDL_DestroyWindow(m_window);
+        m_window = nullptr;
+    }
     SDL_Quit();
+}
+
+void Window::SetTitle(const std::string& p_title) const {
+    if (m_window) {
+        SDL_SetWindowTitle(m_window, p_title.c_str());
+    }
 }
 
 bool Window::RenderTexture(TextureSheets p_textureSheetId,
@@ -91,10 +110,31 @@ void Window::RenderPresent() const {
     SDL_RenderPresent(m_renderer);
 }
 void Window::SetResolutionAndScaling(const int32_t p_windowWidth, const int32_t p_windowHeight, const int32_t p_internalWidth, const int32_t p_internalHeight) const {
-    SDL_SetWindowSize(m_window, p_windowWidth, p_windowHeight);
-    SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    SDL_DisplayMode dm;
+    const int displayIndex = SDL_GetWindowDisplayIndex(m_window);
+    bool isTargetFullscreen = false;
+    if (SDL_GetDesktopDisplayMode(displayIndex >= 0 ? displayIndex : 0, &dm) == 0) {
+        if (p_windowWidth >= dm.w && p_windowHeight >= dm.h) {
+            isTargetFullscreen = true;
+        }
+    }
+
+    if (isTargetFullscreen) {
+        SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_SetWindowPosition(m_window, 0, 0);
+    } else {
+        SDL_SetWindowFullscreen(m_window, 0);
+        SDL_SetWindowSize(m_window, p_windowWidth, p_windowHeight);
+        SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    }
+
     SDL_RenderSetLogicalSize(m_renderer, p_internalWidth, p_internalHeight);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+
+    SDL_RenderSetClipRect(m_renderer, nullptr);
+    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+    SDL_RenderClear(m_renderer);
+    SDL_RenderPresent(m_renderer);
 }
 
 void Window::Render() const {

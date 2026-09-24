@@ -28,13 +28,15 @@ private:
     float            m_mouseX = 0;
     float            m_mouseY = 0;
     std::vector<SDL_Texture*> m_textures;
-    //std::bitset<256>  keyBoardState; sdl e retardat
+    //std::bitset<256>  keyBoardState;
     //std::bitset<8>    mouseState;
     std::function<void(const Event& )> m_eventSender;
 
 public:
     explicit Window(const WindowSettings& p_config=WindowSettings());
     virtual ~Window();
+
+    void SetTitle(const std::string& p_title) const;
 
     // event handlers
     void BuildTextures();

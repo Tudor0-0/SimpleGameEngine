@@ -1,66 +1,122 @@
-# Simple Game Engine
+# SimpleGameEngine
 
-A lightweight, 2D game engine heavily inspired by [The Cherno's Hazel Engine](https://github.com/thecherno/hazel).
+[![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
+[![CMake](https://img.shields.io/badge/CMake-3.26%2B-064F8C?logo=cmake)](https://cmake.org/)
+[![SDL2](https://img.shields.io/badge/Library-SDL2-red.svg)](https://www.libsdl.org/)
 
-This project is architected with modularity in mind, cleanly separating platform-specific windowing and rendering from the core game logic.
+A modular, lightweight 2D game engine written in modern **C++23** and **SDL2**, inspired by [The Cherno's Hazel Engine](https://github.com/TheCherno/Hazel). 
 
-## Architecture
+The engine cleanly separates windowing and platform operations from core game logic using a decoupled **Layer Stack**, a type-safe **compile-time Event Dispatcher**, and an extensible **component-based UI framework**.
 
-The engine is fundamentally split into two distinct parts:
-*   **The Window:** Handles all platform-level operations, including rendering and capturing raw user input.
-*   **The Core:** Manages the actual game logic, state, and interaction.
+---
 
-The Window does not directly access the Core. Instead, it communicates input updates via **event callbacks**.
+## Architecture Overview
 
-## Usage
+```mermaid
+flowchart TD
+    Window["OS / SDL2 Window"] -->|"Raw Input / OS Signals"| EventQueue["Event System"]
+    EventQueue -->|"WindowCloseEvent, KeyPressed, etc."| Core["Core Engine Loop"]
+    
+    subgraph CoreLoop ["Core Engine Lifecycle"]
+        Core -->|"1. Input & Logic (Top -> Bottom)"| LayerStack["Layer Stack"]
+        Core -->|"2. FlushLayerCommands()"| SafeQueue["Deferred Command Queue"]
+        Core -->|"3. Rendering (Bottom -> Top)"| Renderer["Window Renderer"]
+    end
+    
+    subgraph Layers ["Active Layers"]
+        LayerStack --> UI["UI & Overlays (Clickables, Draggables)"]
+        LayerStack --> Game["Gameplay Layers"]
+        LayerStack --> Bg["Background Layer"]
+    end
+```
 
-To build a game or application with this engine, your primary workflow revolves around creating and managing custom layers.
+### Key Architectural Highlights
+* **Deferred Command Queue (`FlushLayerCommands`):** Pushing, popping, or focusing layers during frame execution is deferred to safe sync points, completely preventing iterator invalidation.
+* **Dual-Direction Iteration:** 
+  - **Logic & Input:** Processed from **top to bottom** so UI and modals get first priority to handle and consume input events.
+  - **Rendering:** Processed from **bottom to top** using C++23 ranges (`std::views::reverse`) ensuring proper painter's algorithm depth ordering.
+* **Compile-Time Event Dispatching:** Type-safe event subscription leveraging `static_assert` and C++ type traits (`std::is_invocable_r_v`, `std::is_base_of_v`).
+* **Zero-Subclassing UI:** Interactive UI components (`Clickable`, `Draggable`) utilize stateful callback composition instead of rigid inheritance hierarchies.
 
-### 1. Creating Layers
-You implement your game logic by creating layers. Each layer requires you to set up your event dispatchers and define three core methods:
-*   `onUpdate(dt)`: Handles per-frame logic and state changes, updated using a delta time (`dt`).
-*   `onEvent(event)`: Receives and processes incoming input/window events.
-*   `onRender()`: Handles all drawing operations for that specific layer.
+---
 
-### 2. Layer Communication
-Every layer holds a pointer to the Core. This pointer serves as the primary bridge for layers to communicate with the engine and access shared resources.
+## Quick Example
 
-### 3. Pushing to the Stack
-Once your custom layer is created, you push it onto the engine's Layer Stack. The Core takes over from there, automatically calling your update, render, and event methods based on the stack hierarchy.
+```cpp
+#include "engine/core/core.h"
+#include "engine/core/layer.h"
 
-### 4. The Main Loop
-The main game loop is housed entirely within the Core, abstracting the heavy lifting away from the user. The loop runs automatically; the only configuration you can (and need to) modify is the **target FPS**.
+class GameLayer : public Layer {
+public:
+    LAYER_CLASS_TYPE(mainLayer)
 
-## Layer Stack System
+    void OnUpdate(double dt) override {
+        // Frame logic updated with delta time
+    }
 
-The core logic operates on a **Layer Stack Architecture**.
-*   **Logic Updates:** Processed from **Top to Bottom** (topmost layers get priority for consuming events).
-*   **Rendering:** Processed from **Bottom to Top** (backgrounds draw first, UI draws last).
+    void OnEvent(const Event& event) override {
+        EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<KeyPressedEvent>([](const KeyPressedEvent& e) {
+            // Handle key press
+            return true; // Mark as handled
+        });
+    }
 
-**Current Constraints & Features:**
-*   Only **one** instance of a specific layer class type is permitted on the stack at any given time.
-*   Layers can be manipulated using four primary methods: `push()`, `focus()`, `get()`, and `delete()`.
+    void OnRender() override {
+        // Draw scene elements
+    }
+};
 
-## Event System
+int main() {
+    WindowSettings settings;
+    settings.width = 1600;
+    settings.height = 900;
+    settings.targetFps = 144;
 
-Raw inputs are captured by the Window, converted into standard events, and sent to the Core. These events are decoded at the Layer level using an `EventDispatcher`.
+    Core engine(settings);
+    engine.RegisterLayer(std::make_unique<GameLayer>());
+    engine.Run();
 
+    return 0;
+}
+```
+
+---
+
+## Features
+
+### Event System
 Supported events include:
-*   **Keyboard:** Key Press, Key Release
-*   **Mouse:** Mouse Move, Mouse Button Press, Mouse Button Release
-*   **Window:** Window Resize
+* **Window:** `WindowCloseEvent`, `WindowMinimizedEvent`, `WindowRestoredEvent`
+* **Keyboard:** `KeyPressedEvent`, `KeyReleasedEvent`
+* **Mouse:** `MouseMovedEvent`, `MouseButtonPressedEvent`, `MouseButtonReleasedEvent`
 
-## UI Components
+### UI Framework
+* **`Clickable`:** Reactive UI elements supporting `Hover`, `Click`, `Held`, `Click Released`, and `Click Canceled` states.
+* **`Draggable`:** Extends clickable components with smooth translation, hold timers, and drag threshold detection.
 
-The engine features a built-in, highly flexible UI system designed to work **without the need for inheritance**. You can fully customize these objects—from their physical shape to their behavioral callbacks.
+---
 
-### Clickables
-Interactive UI elements that respond to various mouse states. You can bind custom actions to the following states:
-*   `Hover`
-*   `Click`
-*   `Held`
-*   `Click Released`
-*   `Click Canceled`
+## Building from Source
 
-### Draggables
-An extension of the `Clickable` concept. They share all the same customizable properties and states but include built-in logic for click-and-drag functionality. Holding a click on a `Draggable` and moving the mouse will automatically translate the object's position across the screen.
+### Prerequisites
+* **CMake** $\ge$ 3.26
+* **C++23 compliant compiler** (GCC 13+, Clang 16+, or MSVC 2022+)
+* *Note:* All core third-party dependencies (`SDL2`, `SDL2_image`, `SDL2_mixer`) are automatically fetched and built via CMake `FetchContent`—no manual library installations required.
+
+### Build Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Tudor0-0/SimpleGameEngine.git
+cd SimpleGameEngine
+
+# 2. Configure with CMake
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+# 3. Build the project
+cmake --build build -j$(nproc)
+
+# 4. Run the executable
+./build/SimpleGameEngine
+```

@@ -7,7 +7,7 @@
 #include "engine/core/core.h"
 #include "engine/basicUiObjects/clickable.h"
 #include "engine/basicUiObjects/draggable.h"
-#define FPS
+
 #define TEXTURE_BUTTON(buttonName,buttonPoz,buttonState)Texture buttonName={{48*buttonState,32*buttonPoz,48,32},TextureSheets::wControlButtons}
 class Overlay : public Layer {
 private:
@@ -26,7 +26,7 @@ private:
 
     Clickable m_close,m_minimize,m_restore;
 
-    //double camerax=0,cameray=0;
+    double m_fpsTimer = 0.0;
 public:
     LAYER_CLASS_TYPE(overlayLayer);
     void OnEvent(const Event &p_event) override {
@@ -54,28 +54,21 @@ public:
            return false;
         });
     }
-    void OnUpdate(double ) override {
+    void OnUpdate(double p_deltaTime) override {
+        m_fpsTimer += p_deltaTime;
+        if (m_fpsTimer >= 0.5) {
+            std::cout << "\rFPS: " << m_core->GetCurrentFps() << "   " << std::flush;
+            m_fpsTimer = 0.0;
+        }
     }
-    void OnRender() override{
-#ifdef FPS
-    #ifdef _WIN32
-         system("cls");
-
-    #elif defined(__APPLE__) || defined(__linux__)
-        printf("\033[2J\033[H");
-    #endif
-        std::cout<<m_core->GetCurrentFps()<<'\n';
-        std::cout<<std::flush;
-#endif
+    void OnRender() override {
         m_core->GetWindow()->RenderRect();
         m_close.Render(m_core->GetWindow(),0,0);
         m_minimize.Render(m_core->GetWindow(),0,0);
         m_restore.Render(m_core->GetWindow(),0,0);
     }
 
-    ~Overlay() override{
-        std::cout<<"~overlayLayer()"<<'\n';
-    }
+    ~Overlay() override = default;
     Overlay() {
         m_close.Init({ 1600-48, 0 , 48 , 32 },
             {closeNormal,closeHovered,closePressed},

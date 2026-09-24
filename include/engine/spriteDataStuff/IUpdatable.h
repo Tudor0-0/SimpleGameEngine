@@ -1,7 +1,6 @@
 #pragma once
 #include "SDL.h"
 
-//TODO nush cum sa numesc acest header
 class IUpdatable {
 public:
     virtual void Update(double dt) = 0;

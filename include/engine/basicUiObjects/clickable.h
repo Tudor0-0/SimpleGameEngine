@@ -67,7 +67,7 @@ class Clickable:public Renderable,public IUpdatable {
         return false;
     }
     void Render(Window *window,const double &p_cameraX,const double &p_cameraY)override {
-        window->RenderTexture(m_frames[m_currentFrame].m_spreadSheetID,
+        window->RenderTexture(m_frames[m_currentFrame].m_spriteSheetId,
                                 m_frames[m_currentFrame].m_sourceRect,
                                 Scale(SDL_FRect{static_cast<float>(m_transform.x-p_cameraX),
                                                          static_cast<float>(m_transform.y-p_cameraY),

@@ -10,13 +10,27 @@ void Window::SetEventHandler(std::function<void(const Event &)> p_eventSender) {
 
 void Window::GetInput() {
     SDL_Event event;
-    while (SDL_PollEvent(&event))
-        if (event.type == SDL_WINDOWEVENT) {
-            if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
-                m_eventSender(WindowMinimizedEvent());
-            if (event.window.event == SDL_WINDOWEVENT_RESTORED)
-                m_eventSender(WindowRestoredEvent());
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            if (m_eventSender) {
+                m_eventSender(WindowCloseEvent());
+            }
+        } else if (event.type == SDL_WINDOWEVENT) {
+            if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                if (m_eventSender) {
+                    m_eventSender(WindowCloseEvent());
+                }
+            } else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED) {
+                if (m_eventSender) {
+                    m_eventSender(WindowMinimizedEvent());
+                }
+            } else if (event.window.event == SDL_WINDOWEVENT_RESTORED) {
+                if (m_eventSender) {
+                    m_eventSender(WindowRestoredEvent());
+                }
+            }
         }
+    }
     const uint8_t *newKeyState = SDL_GetKeyboardState(nullptr);
     uint8_t *oldKeyState = m_keyState;
     for (uint32_t i = 0; i < SDL_NUM_SCANCODES; i++)

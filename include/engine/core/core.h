@@ -14,8 +14,10 @@ private:
     std::vector<std::unique_ptr<Layer>> m_stackLayers;
     std::vector<LayerCommand> m_pendingCommands;
     bool m_running=false;
-    uint32_t m_fpsTarget = 999999 , m_currentFps=0;
-    double m_frameTarget = 1.0/m_fpsTarget; //in secunde
+    bool m_minimized=false;
+    uint32_t m_fpsTarget = 999999;
+    uint32_t m_currentFps = 0;
+    double m_frameTarget = 1.0 / m_fpsTarget; // In seconds
 public:
     explicit Core(const WindowSettings& p_windowSettings=WindowSettings());
     virtual ~Core();
@@ -36,7 +38,7 @@ public:
         }
         return nullptr;
     }
-    /*template<typename T>
+    template<typename T>
    std::vector<std::unique_ptr<Layer>>::iterator
     GetLayerIterator() {
         for (auto it=m_stackLayers.begin(); it != m_stackLayers.end(); ++it) {
@@ -45,8 +47,7 @@ public:
             }
         }
         return m_stackLayers.end();
-    }*/
-    //aparent exista std::rotate
+    }
     void EraseLayer(Layer *layer) {
         if (!layer)return;
         layer->SetActive(false);
@@ -83,8 +84,9 @@ public:
         m_pendingCommands.push_back(std::move(command));
      }
     void RaiseEvent(const Event &p_event) const;
-    void BindEventListener(Window &p_window) const;
+    void BindEventListener(Window &p_window);
     [[nodiscard]] uint32_t GetCurrentFps() const;
+    [[nodiscard]] bool IsMinimized() const;
     void FlushLayerCommands();
     Core& operator = (const Core &p_core) = delete;
     Core(const Core &p_core) = delete;

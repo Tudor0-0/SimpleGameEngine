@@ -60,3 +60,7 @@ class WindowFullscreenEvent: public Event {
 public:
      EVENT_CLASS_TYPE(windowFullscreen)
 };
+class WindowCloseEvent: public Event {
+public:
+     EVENT_CLASS_TYPE(windowClosed)
+};

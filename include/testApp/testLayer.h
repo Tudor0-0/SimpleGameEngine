@@ -1,4 +1,4 @@
-#pragma once
+    #pragma once
 #include <iostream>
 #include <vector>
 #include "engine/core/layer.h"
@@ -12,8 +12,8 @@ class TestLayer: public Layer {
 private:
     uint8_t r=255,g=0,b=0,a=50,cnt=0,fullscreen=0;
     bool changing=false;
-    std::vector<std::shared_ptr<Draggable>> butoane;
-    double camerax=0,cameray=0;
+    std::vector<std::shared_ptr<Draggable>> m_buttons;
+    double m_cameraX = 0, m_cameraY = 0;
 public:
     void OnEvent(const Event &p_event) override {
         EventDispatcher dispatcher(p_event);
@@ -32,29 +32,31 @@ public:
                 return true;
             }
             if (event.GetKeyCode() == SDL_SCANCODE_W) {
-              cameray-=10;
+              m_cameraY-=10;
                return true;
            }
             if (event.GetKeyCode() == SDL_SCANCODE_S) {
-              cameray+=10;
+              m_cameraY+=10;
                return true;
            }
             if (event.GetKeyCode() == SDL_SCANCODE_A) {
-            camerax-=10;
+            m_cameraX-=10;
              return true;
          }
           if (event.GetKeyCode() == SDL_SCANCODE_D) {
-            camerax+=10;
+            m_cameraX+=10;
              return true;
          }
             if (event.GetKeyCode() == SDL_SCANCODE_R) {
-                if (fullscreen==0)
-            m_core->GetWindow()->SetResolutionAndScaling(1920,1080,1920,1080),fullscreen=1;
-                else
-                    m_core->GetWindow()->SetResolutionAndScaling(1600,900,1920,1080),fullscreen=0;
-
-             return true;
-         }
+                if (fullscreen == 0) {
+                    m_core->GetWindow()->SetResolutionAndScaling(1920, 1080, 1600, 900);
+                    fullscreen = 1;
+                } else {
+                    m_core->GetWindow()->SetResolutionAndScaling(1600, 900, 1600, 900);
+                    fullscreen = 0;
+                }
+                return true;
+            }
             return false;
         });
         dispatcher.Dispatch<KeyReleasedEvent>([this](const KeyReleasedEvent &event) -> bool {
@@ -66,8 +68,8 @@ public:
         });
         dispatcher.Dispatch<MouseButtonPressedEvent>([this](const MouseButtonPressedEvent &event) -> bool {
             if (event.GetButtonCode() == SDL_BUTTON_LEFT) {
-                for (auto it=butoane.begin();it!=butoane.end();++it) if ((*it)->OnMousePressed()){
-                    std::rotate(butoane.begin(),it,it+1);
+                for (auto it=m_buttons.begin();it!=m_buttons.end();++it) if ((*it)->OnMousePressed()){
+                    std::rotate(m_buttons.begin(),it,it+1);
                     return true;
                 }
                 return false;
@@ -80,8 +82,8 @@ public:
         });
         dispatcher.Dispatch<MouseButtonReleasedEvent>([this](const MouseButtonReleasedEvent &event) -> bool {
             if (event.GetButtonCode() == SDL_BUTTON_LEFT) {
-                for (auto it=butoane.begin();it!=butoane.end();++it) if ((*it)->OnMouseReleased()){
-                    std::rotate(butoane.begin(),it,it+1);
+                for (auto it=m_buttons.begin();it!=m_buttons.end();++it) if ((*it)->OnMouseReleased()){
+                    std::rotate(m_buttons.begin(),it,it+1);
                     return true;
                 }
                 return false;
@@ -91,8 +93,8 @@ public:
         dispatcher.Dispatch<MouseMovedEvent>([this](const MouseMovedEvent &event) -> bool{
             const float posX = event.GetXPos();
             const float posY=event.GetYPos();
-            for (auto it=butoane.begin();it!=butoane.end();++it) if ((*it)->OnMouseMoved(posX,posY,camerax,cameray)){
-                     std::rotate(butoane.begin(),it,it+1);
+            for (auto it=m_buttons.begin();it!=m_buttons.end();++it) if ((*it)->OnMouseMoved(posX,posY,m_cameraX,m_cameraY)){
+                     std::rotate(m_buttons.begin(),it,it+1);
                      return true;
                  }
             return false;
@@ -100,7 +102,7 @@ public:
     }
     void OnUpdate(double p_deltaTime) override {
         cnt++;
-        for (auto it=butoane.begin();it!=butoane.end();++it) {
+        for (auto it=m_buttons.begin();it!=m_buttons.end();++it) {
             (*it)->Update(p_deltaTime);
         }
         if (changing) {
@@ -112,17 +114,12 @@ public:
     }
     void OnRender() override {
         m_core->GetWindow()->RenderClear(r,g,b,a);
-        for (auto it=butoane.rbegin();it!=butoane.rend();++it) {
-            (*it)->Render(m_core->GetWindow(),camerax,cameray);
-        }
-        if (cnt==255) {
-           //std::cout<<"here"<<'\n';;
+        for (auto it=m_buttons.rbegin();it!=m_buttons.rend();++it) {
+            (*it)->Render(m_core->GetWindow(),m_cameraX,m_cameraY);
         }
     }
     LAYER_CLASS_TYPE(testLayer);
-    ~TestLayer() override {
-        std::cout<<"~testLayer()"<<'\n';
-    }
+    ~TestLayer() override = default;
     TestLayer() {
         int n = 3;
 
@@ -146,22 +143,17 @@ public:
                 [this, rawBtn]() {
                     rawBtn->SetCurrentFrame(2);
                     rawBtn->SetScale(0.90);
-                    //int posrand=rand()%butoane.size();
                     r = rand() % 256;
                     g = rand() % 256;
                     b = rand() % 256;
                     a = rand() % 256;
-                  //  if (rand()%2)
-                   // butoane.erase(butoane.begin()+posrand);
-                  //  else {
-                  //  }
                 },
                 [this,rawBtn]() { rawBtn->SetCurrentFrame(2); rawBtn->SetScale(0.90); },
                 [this,rawBtn]() { rawBtn->SetCurrentFrame(1); rawBtn->SetScale(1); },
                 []() {}
             );
 
-            butoane.push_back(currentBtn);
+            m_buttons.push_back(currentBtn);
         }
     }
 };
