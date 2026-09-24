@@ -138,7 +138,7 @@ jobs:
             runs_asan: false
 
           - os: macos-14
-            c: gcc-13
+            c: clang
             cxx: g++-13
             name: "macOS 14 GCC 13"
             # cmake_flags:
