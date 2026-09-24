@@ -45,7 +45,7 @@ void Core::Run() {
             m_currentFps = static_cast<uint32_t>(1 / deltaFrameTime);
     }
 }
-void Core::Stop() {
+void Core::Stop() noexcept {
     m_running = false;
 }
 void Core::RaiseEvent(const Event &p_event) const {

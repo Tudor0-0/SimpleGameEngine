@@ -21,7 +21,7 @@ public:
     explicit Core(const WindowSettings &p_windowSettings = WindowSettings());
     virtual ~Core();
     void Run();
-    void Stop();
+    void Stop() noexcept;
     void RegisterLayer(std::unique_ptr<Layer> p_layer);
 
     void SetFpsTarget(uint32_t p_targetFps);
@@ -85,4 +85,5 @@ public:
     Core &operator=(const Core &p_core) = delete;
     Core(const Core &p_core) = delete;
     Core(Core &&p_core) = delete;
+    Core &operator=(Core &&p_core) = delete;
 };
